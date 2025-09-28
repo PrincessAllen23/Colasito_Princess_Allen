@@ -3,23 +3,22 @@ defined('PREVENT_DIRECT_ACCESS') OR exit('No direct script access allowed');
 
 /**
  * Controller: UsersController
- * 
- * Automatically generated via CLI.
  */
 class UsersController extends Controller {
     public function __construct()
     {
         parent::__construct();
+        $this->call->model('UsersModel'); // load model once in constructor
     }
 
+    // Show all users
     public function index()
     {
-        $this->call->model('UsersModel');
-        $data['users'] = $this->UsersModel-> All();
-
+        $data['users'] = $this->UsersModel->all(); // fixed: all() not All()
         $this->call->view('users/index', $data);
     }
 
+    // Create user
     function create(){
         if($this->io->method() == 'post'){
             $fname = $this->io->post('fname');
@@ -33,16 +32,16 @@ class UsersController extends Controller {
             ];
 
             if($this->UsersModel->insert($data)){
-                redirect(site_url(''));
+                redirect(site_url('/')); // fixed redirect
             }else{
                 echo "Error in creating user.";
             }
-
         }else{
             $this->call->view('users/create');
         }
     }
 
+    // Update user
     function update($id){
         $user = $this->UsersModel->find($id);
         if(!$user){
@@ -62,7 +61,7 @@ class UsersController extends Controller {
             ];
 
             if($this->UsersModel->update($id, $data)){
-                redirect();
+                redirect(site_url('/')); // fixed redirect
             }else{
                 echo "Error in updating user.";
             }
@@ -72,9 +71,10 @@ class UsersController extends Controller {
         }
     }
     
+    // Delete user
     function delete($id){
         if($this->UsersModel->delete($id)){
-            redirect();
+            redirect(site_url('/')); // fixed redirect
         }else{
             echo "Error in deleting user.";
         }
