@@ -25,7 +25,8 @@ class UsersController extends Controller {
         // Load Pagination library and initialize
         $this->call->library('Pagination');
         $pagination = new Pagination();
-        $base_url = 'users'; // base route for pages
+    // use root as base route for pages (routes.php maps '/' to UsersController::index)
+    $base_url = '';
     $pagination->set_theme('tailwind');
     // Use query string for page links so controller can read $_GET['page']
     $pagination->set_options(['page_delimiter' => '?page=']);
@@ -58,7 +59,7 @@ class UsersController extends Controller {
 
             if($this->UsersModel->insert($data)){
                 $page = $this->io->post('page') ? (int) $this->io->post('page') : 1;
-                redirect(site_url('users') . '?page=' . $page);
+                redirect(site_url('') . '?page=' . $page);
             }else{
                 echo "Error in creating user.";
             }
@@ -88,7 +89,7 @@ class UsersController extends Controller {
 
             if($this->UsersModel->update($id, $data)){
                 $page = $this->io->post('page') ? (int) $this->io->post('page') : 1;
-                redirect(site_url('users') . '?page=' . $page);
+                redirect(site_url('') . '?page=' . $page);
             }else{
                 echo "Error in updating user.";
             }
@@ -103,7 +104,7 @@ class UsersController extends Controller {
         if($this->UsersModel->delete($id)){
             // preserve page if provided via GET
             $page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int) $_GET['page'] : 1;
-            redirect(site_url('users') . '?page=' . $page);
+            redirect(site_url('') . '?page=' . $page);
         }else{
             echo "Error in deleting user.";
         }

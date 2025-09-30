@@ -90,7 +90,7 @@ $config['base_url'] 				= 'https://bacsa-jamesrodge.onrender.com/';
 | variable to blank.
 |
 */
-$config['index_page']               = '';
+$config['index_page']               = 'index.php';
 
 /*
 |--------------------------------------------------------------------------

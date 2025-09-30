@@ -11,7 +11,7 @@
   <h2>Update User Information</h2>
 
   <?php $current_page = isset($_GET['page']) ? (int) $_GET['page'] : 1; ?>
-  <form action="<?=site_url('users/update/'.$user['id'])?>" method="POST">
+  <form action="<?=site_url('index.php/users/update/'.$user['id'])?>" method="POST">
     <input type="hidden" name="page" value="<?= $current_page ?>">
     <div>
       <label>First Name</label><br>
