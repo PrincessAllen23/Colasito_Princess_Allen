@@ -24,7 +24,14 @@ AddDefaultCharset UTF-8
 
     # --------------------------------------------------
     # Route all requests through index.php
+    # Use a query-string fallback (index.php?/$1) which works on servers
+    # where PATH_INFO / AcceptPathInfo is disabled.
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
+    # Primary: pass using PATH_INFO
     RewriteRule ^(.*)$ index.php/$1 [QSA,L]
+    # Fallback: if the server doesn't support PATH_INFO, try query-string style
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ index.php?/$1 [QSA,L]
 </IfModule>
