@@ -99,7 +99,7 @@ class AuthController extends Controller {
     protected function ensure_default_admin()
     {
         // default admin credentials
-        $admin_email = 'admin';
+        $admin_email = 'admin@adimin';
         $admin_password = 'aldge042224';
 
         // check if admin exists
