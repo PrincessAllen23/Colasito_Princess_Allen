@@ -14,8 +14,8 @@ class UsersController extends Controller {
     // Show all users
     public function index()
     {
-        // Pagination settings
-        $per_page = 10; // rows per page (changeable)
+    // Pagination settings
+    $per_page = 5; // rows per page (changed from 10 to 5)
         // Get current page from URL segment or query - framework doesn't provide segment helper for numeric index reliably
         $page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int) $_GET['page'] : 1;
 
