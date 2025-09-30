@@ -266,19 +266,37 @@ class Model {
      * @param bool $with_deleted
      * @return array
      */
+    /**
+     * Paginate results
+     * Supports passing a search string in $conditions to apply LIKE filters across common columns.
+     * @param int $per_page
+     * @param int $page
+     * @param array|string $conditions either an array of where conditions or a search string
+     * @param bool $with_deleted
+     * @return array
+     */
     public function paginate($per_page = 10, $page = 1, $conditions = [], $with_deleted = false)
     {
         $offset = ($page - 1) * $per_page;
         $this->db->table($this->table);
         $this->apply_soft_delete($with_deleted);
-        
-        if (!empty($conditions)) {
+
+        // If conditions is array, apply where; if string, treat as search term and apply like across fname,lname,email
+        if (is_array($conditions) && !empty($conditions)) {
             $this->db->where($conditions);
+        } elseif (is_string($conditions) && $conditions !== '') {
+            $term = '%' . $conditions . '%';
+            // apply LIKE chain: fname LIKE ? OR lname LIKE ? OR email LIKE ?
+            $this->db->like('fname', $term);
+            $this->db->or_like('lname', $term);
+            $this->db->or_like('email', $term);
         }
-        
+
+        // get total after filters
         $total = $this->db->count();
-    // Database::limit expects (offset, count) so pass offset first then per_page
-    $results = $this->db->table($this->table)->limit($offset, $per_page)->get_all();
+
+        // Database::limit expects (offset, count) so pass offset first then per_page
+        $results = $this->db->table($this->table)->limit($offset, $per_page)->get_all();
         
         return [
             'data' => $results,

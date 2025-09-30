@@ -27,10 +27,18 @@
     <div class="max-w-6xl mx-auto mt-10 p-8 rounded-3xl glass-container">
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-4xl font-extrabold text-white drop-shadow-lg">User Directory</h1>
-            <a href="<?=site_url('users/create')?>"
+            <div class="flex items-center gap-4">
+                <form method="get" action="<?=site_url('')?>" class="flex items-center gap-2">
+                    <input type="text" name="q" value="<?= isset($q) ? htmlspecialchars($q, ENT_QUOTES) : '' ?>" placeholder="Search name or email"
+                        class="px-4 py-2 rounded-full bg-white bg-opacity-10 text-white focus:outline-none" />
+                    <button type="submit" class="px-4 py-2 rounded-full bg-indigo-600 hover:bg-indigo-500">Search</button>
+                </form>
+
+                <a href="<?=site_url('users/create')?>"
                 class="inline-flex items-center gap-2 bg-white bg-opacity-20 hover:bg-opacity-30 border border-white border-opacity-30 text-white font-semibold px-6 py-3 rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg">
                 <i class="fa-solid fa-user-plus"></i> Add New User
             </a>
+            </div>
         </div>
 
         <div class="overflow-x-auto rounded-xl">
@@ -57,14 +65,25 @@
                                     </span>
                                 </td>
                                 <td class="py-4 px-4 flex justify-center gap-4">
-                                    <a href="<?=site_url('users/update/'.$user['id']);?>"
+                                    <?php
+                                    // Check session role; lava_instance()->session is available via kernel
+                                    $role = function_exists('lava_instance') ? lava_instance()->session->userdata('role') : null;
+                                    $qs = isset($q) && $q !== '' ? '?q=' . urlencode($q) . (isset($_GET['page']) ? '&page=' . (int)$_GET['page'] : '') : (isset($_GET['page']) ? '?page=' . (int)$_GET['page'] : '');
+                                    $update_url = site_url('users/update/'.$user['id']) . $qs;
+                                    $delete_url = site_url('users/delete/'.$user['id']) . $qs;
+                                    ?>
+                                    <?php if ($role === 'admin'): ?>
+                                    <a href="<?= $update_url; ?>"
                                         class="text-green-300 hover:text-green-500 transition-colors" title="Update">
                                         <i class="fa-solid fa-pen-to-square text-lg"></i>
                                     </a>
-                                    <a href="<?=site_url('users/delete/'.$user['id']);?>"
+                                    <a href="<?= $delete_url; ?>"
                                         class="text-red-300 hover:text-red-500 transition-colors" title="Delete">
                                         <i class="fa-solid fa-trash text-lg"></i>
                                     </a>
+                                    <?php else: ?>
+                                    <span class="text-gray-300 text-xs italic">Restricted</span>
+                                    <?php endif; ?>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

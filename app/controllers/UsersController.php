@@ -14,23 +14,31 @@ class UsersController extends Controller {
     // Show all users
     public function index()
     {
-    // Pagination settings
-    $per_page = 5; // rows per page (changed from 10 to 5)
-        // Get current page from URL segment or query - framework doesn't provide segment helper for numeric index reliably
-        $page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int) $_GET['page'] : 1;
+        // Pagination settings
+        $per_page = 5; // rows per page
 
-        // Use model paginate helper (returns data, total, etc.)
-        $paginated = $this->UsersModel->paginate($per_page, $page);
+        // Get current page and search query from query string
+        $page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int) $_GET['page'] : 1;
+        $q = isset($_GET['q']) ? trim($_GET['q']) : '';
+
+        // Use model paginate helper (returns data, total, etc.) - pass search query
+        $paginated = $this->UsersModel->paginate($per_page, $page, $q);
 
         // Load Pagination library and initialize
         $this->call->library('Pagination');
         $pagination = new Pagination();
-    // use root as base route for pages (routes.php maps '/' to UsersController::index)
-    $base_url = '';
+        // use root as base route for pages (routes.php maps '/' to UsersController::index)
+        $base_url = '';
     $pagination->set_theme('tailwind');
     // Use query string for page links so controller can read $_GET['page']
-    $pagination->set_options(['page_delimiter' => '?page=']);
-    $pagination->initialize($paginated['total'], $per_page, $paginated['current_page'], $base_url, 5);
+        // Keep search query in pagination links if present
+        $page_delim = '?page=';
+        if (!empty($q)) {
+            // preserve q param: ?q=...&page=
+            $page_delim = '?q=' . urlencode($q) . '&page=';
+        }
+        $pagination->set_options(['page_delimiter' => $page_delim]);
+        $pagination->initialize($paginated['total'], $per_page, $paginated['current_page'], $base_url, 5);
 
         $data['users'] = $paginated['data'];
         $data['pagination_html'] = $pagination->paginate();
@@ -40,6 +48,8 @@ class UsersController extends Controller {
             'current_page' => $paginated['current_page'],
             'last_page' => $paginated['last_page']
         ];
+        // pass back search query so view can show it
+        $data['q'] = $q;
         // (no debug output in production)
 
         $this->call->view('users/index', $data);
@@ -47,6 +57,11 @@ class UsersController extends Controller {
 
     // Create user
     function create(){
+        // Authorization: only admin can create
+        if ($this->session->userdata('role') !== 'admin') {
+            redirect(site_url('auth/login'));
+        }
+
         if($this->io->method() == 'post'){
             $fname = $this->io->post('fname');
             $lname = $this->io->post('lname');
@@ -71,6 +86,10 @@ class UsersController extends Controller {
 
     // Update user
     function update($id){
+        // Authorization: only admin can update
+        if ($this->session->userdata('role') !== 'admin') {
+            redirect(site_url('auth/login'));
+        }
         $user = $this->UsersModel->find($id);
         if(!$user){
             echo "User not found.";
@@ -102,6 +121,11 @@ class UsersController extends Controller {
     
     // Delete user
     function delete($id){
+        // Authorization: only admin can delete
+        if ($this->session->userdata('role') !== 'admin') {
+            redirect(site_url('auth/login'));
+        }
+
         if($this->UsersModel->delete($id)){
             // preserve page if provided via GET
             $page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int) $_GET['page'] : 1;
