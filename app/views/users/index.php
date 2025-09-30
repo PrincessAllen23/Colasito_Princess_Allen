@@ -76,16 +76,7 @@
                 </tbody>
             </table>
         </div>
-        <?php if(isset($debug_db_total)): ?>
-            <div class="mt-4 text-sm text-gray-300">
-                <strong>Debug:</strong> total rows = <?= $debug_db_total; ?>
-                <pre class="text-xs text-gray-200 bg-black/20 p-3 rounded mt-2"><?= htmlspecialchars(print_r($debug_db_sample, true)); ?></pre>
-                <div class="mt-2 text-xs">
-                    <strong>Raw all() fetch:</strong>
-                    <pre class="text-xs text-gray-200 bg-black/20 p-3 rounded mt-2"><?= htmlspecialchars(print_r($debug_raw_all ?? [], true)); ?></pre>
-                </div>
-            </div>
-        <?php endif; ?>
+        
         <div class="mt-6">
             <?php if(!empty($pagination_html)): ?>
                 <?= $pagination_html; ?>
