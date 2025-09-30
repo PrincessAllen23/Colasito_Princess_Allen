@@ -175,6 +175,14 @@ if (!empty($_SERVER['PATH_INFO'])) {
 	} else {
 		$url = $request_uri;
 	}
+	// Normalize common server patterns: remove leading /index.php if still present
+	if (strpos($url, '/index.php') === 0) {
+		$url = substr($url, strlen('/index.php'));
+	}
+	// Remove query-style front controller (/?/path)
+	if (strpos($url, '/?/') === 0) {
+		$url = substr($url, 3);
+	}
 } else {
 	// Fallback to previous behavior (PHP_SELF minus SCRIPT_NAME)
 	$php_self = isset($_SERVER['PHP_SELF']) ? $_SERVER['PHP_SELF'] : '';
