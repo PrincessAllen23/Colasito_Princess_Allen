@@ -50,3 +50,23 @@ $router->get('/users/delete/{id}', 'UsersController::delete');
 // Admin panel
 $router->get('/admin', 'AdminController::index');
 $router->match('/admin/set_role/{id}', 'AdminController::set_role', ['POST']);
+
+// Authentication
+$router->match('/auth/login', 'AuthController::login', ['GET', 'POST']);
+$router->get('/auth/logout', 'AuthController::logout');
+$router->match('/auth/register', 'AuthController::register', ['GET', 'POST']);
+
+// Temporary debug route - remove after troubleshooting
+$router->get('/__debug_router', function() {
+	header('Content-Type: text/plain');
+	$vars = [
+		'REQUEST_URI' => isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '',
+		'SCRIPT_NAME' => isset($_SERVER['SCRIPT_NAME']) ? $_SERVER['SCRIPT_NAME'] : '',
+		'PATH_INFO' => isset($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : '',
+		'PHP_SELF' => isset($_SERVER['PHP_SELF']) ? $_SERVER['PHP_SELF'] : '',
+		'SCRIPT_FILENAME' => isset($_SERVER['SCRIPT_FILENAME']) ? $_SERVER['SCRIPT_FILENAME'] : '',
+	];
+	foreach ($vars as $k => $v) {
+		echo $k . ': ' . $v . "\n";
+	}
+});

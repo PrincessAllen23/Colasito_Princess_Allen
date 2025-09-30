@@ -155,8 +155,37 @@ function &lava_instance()
 }
 $performance->stop('lavalust');
 
-// Handle the request
-$url = $router->sanitize_url(str_replace($_SERVER['SCRIPT_NAME'], '', $_SERVER['PHP_SELF']));
+// Handle the request ---------------------------------------------------
+// Build the request path robustly so routing works on different servers
+// (Apache with mod_rewrite, IIS, Windows/PHP built-in server, etc.).
+$request_uri = isset($_SERVER['REQUEST_URI']) ? parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) : '';
+$script_name = isset($_SERVER['SCRIPT_NAME']) ? $_SERVER['SCRIPT_NAME'] : '';
+$script_dir = rtrim(str_replace('\\', '/', dirname($script_name)), '/');
+$url = '';
+
+// Prefer PATH_INFO when available
+if (!empty($_SERVER['PATH_INFO'])) {
+	$url = $_SERVER['PATH_INFO'];
+} elseif ($request_uri !== '') {
+	// Strip script name from URI if present (/index.php/...), otherwise strip script directory
+	if ($script_name !== '' && strpos($request_uri, $script_name) === 0) {
+		$url = substr($request_uri, strlen($script_name));
+	} elseif ($script_dir !== '' && $script_dir !== '/' && strpos($request_uri, $script_dir) === 0) {
+		$url = substr($request_uri, strlen($script_dir));
+	} else {
+		$url = $request_uri;
+	}
+} else {
+	// Fallback to previous behavior (PHP_SELF minus SCRIPT_NAME)
+	$php_self = isset($_SERVER['PHP_SELF']) ? $_SERVER['PHP_SELF'] : '';
+	$url = str_replace($script_name, '', $php_self);
+}
+
+$url = $router->sanitize_url($url);
+if ($url === '') {
+	$url = '/';
+}
+
 $method = isset($_SERVER['REQUEST_METHOD']) ? strtoupper($_SERVER['REQUEST_METHOD']) : '';
 $router->initiate($url, $method);
 ?>
