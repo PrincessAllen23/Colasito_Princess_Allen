@@ -46,6 +46,25 @@
                class="w-full px-4 py-3 bg-black/30 text-gray-200 border border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none shadow-sm transition duration-200">
       </div>
 
+      <!-- Password -->
+      <div>
+        <label class="block text-gray-300 mb-1 font-medium">Password (optional)</label>
+        <input type="password" name="password" placeholder="Set a password (admin only)"
+               class="w-full px-4 py-3 bg-black/30 text-gray-200 border border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none shadow-sm transition duration-200">
+      </div>
+
+      <!-- Role (admin only) -->
+      <?php $role = function_exists('lava_instance') ? lava_instance()->session->userdata('role') : null; ?>
+      <?php if ($role === 'admin'): ?>
+      <div>
+        <label class="block text-gray-300 mb-1 font-medium">Role</label>
+        <select name="role" class="w-full px-4 py-3 bg-black/30 text-gray-200 border border-gray-600 rounded-xl">
+          <option value="user">User</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+      <?php endif; ?>
+
       <!-- Sign Up Button -->
       <button type="submit"
               class="w-full bg-gradient-to-r from-green-600 to-cyan-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold py-3 rounded-xl shadow-lg transition duration-300 transform hover:scale-105">

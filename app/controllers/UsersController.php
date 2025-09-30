@@ -14,6 +14,11 @@ class UsersController extends Controller {
     // Show all users
     public function index()
     {
+        // Require login: redirect to login/register if not authenticated
+        if (!$this->session->userdata('user_id')) {
+            redirect(site_url('auth/login'));
+        }
+
         // Pagination settings
         $per_page = 5; // rows per page
 
@@ -66,12 +71,26 @@ class UsersController extends Controller {
             $fname = $this->io->post('fname');
             $lname = $this->io->post('lname');
             $email = $this->io->post('email');
+            $password = $this->io->post('password');
+            $role = $this->io->post('role');
 
             $data = [
                 'fname' => $fname,
                 'lname' => $lname,
                 'email' => $email
             ];
+
+            // If password provided, hash it
+            if (!empty($password)) {
+                $data['password'] = password_hash($password, PASSWORD_DEFAULT);
+            }
+
+            // Only allow setting role if current user is admin (we already checked) and a valid role is provided
+            if (!empty($role) && in_array($role, ['admin', 'user'])) {
+                $data['role'] = $role;
+            } else {
+                $data['role'] = 'user';
+            }
 
             if($this->UsersModel->insert($data)){
                 $page = $this->io->post('page') ? (int) $this->io->post('page') : 1;
@@ -90,22 +109,34 @@ class UsersController extends Controller {
         if ($this->session->userdata('role') !== 'admin') {
             redirect(site_url('auth/login'));
         }
+
         $user = $this->UsersModel->find($id);
         if(!$user){
             echo "User not found.";
             return;
         }
-
-    if($this->io->method() == 'post'){
+        if($this->io->method() == 'post'){
             $fname = $this->io->post('fname');
             $lname = $this->io->post('lname');
             $email = $this->io->post('email');
+            $password = $this->io->post('password');
+            $role = $this->io->post('role');
 
             $data = [
                 'fname' => $fname,
                 'lname' => $lname,
                 'email' => $email
             ];
+
+            // If password provided, hash and update
+            if (!empty($password)) {
+                $data['password'] = password_hash($password, PASSWORD_DEFAULT);
+            }
+
+            // Only update role if admin and valid role provided
+            if (!empty($role) && in_array($role, ['admin', 'user'])) {
+                $data['role'] = $role;
+            }
 
             if($this->UsersModel->update($id, $data)){
                 $page = $this->io->post('page') ? (int) $this->io->post('page') : 1;

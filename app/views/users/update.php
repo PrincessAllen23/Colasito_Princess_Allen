@@ -31,6 +31,24 @@
     </div>
     <br>
 
+    <div>
+      <label>Password (leave blank to keep current)</label><br>
+      <input type="password" name="password" value="">
+    </div>
+    <br>
+
+    <?php $current_role = $user['role'] ?? 'user'; $viewer_role = function_exists('lava_instance') ? lava_instance()->session->userdata('role') : null; ?>
+    <?php if ($viewer_role === 'admin'): ?>
+    <div>
+      <label>Role</label><br>
+      <select name="role">
+        <option value="user" <?= $current_role === 'user' ? 'selected' : '' ?>>User</option>
+        <option value="admin" <?= $current_role === 'admin' ? 'selected' : '' ?>>Admin</option>
+      </select>
+    </div>
+    <br>
+    <?php endif; ?>
+
     <button type="submit">Update Now</button>
   </form>
 

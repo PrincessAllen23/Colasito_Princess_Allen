@@ -34,10 +34,17 @@
                     <button type="submit" class="px-4 py-2 rounded-full bg-indigo-600 hover:bg-indigo-500">Search</button>
                 </form>
 
-                <a href="<?=site_url('users/create')?>"
-                class="inline-flex items-center gap-2 bg-white bg-opacity-20 hover:bg-opacity-30 border border-white border-opacity-30 text-white font-semibold px-6 py-3 rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg">
-                <i class="fa-solid fa-user-plus"></i> Add New User
-            </a>
+                <!-- show signed-in user and logout -->
+                <?php $uid = function_exists('lava_instance') ? lava_instance()->session->userdata('user_id') : null; ?>
+                <?php if ($uid): ?>
+                    <?php $user = lava_instance()->UsersModel->find($uid); ?>
+                    <div class="text-sm text-white">Signed in as <strong><?= htmlspecialchars($user['email'] ?? 'unknown') ?></strong>
+                        <a href="<?= site_url('auth/logout') ?>" class="ml-3 text-indigo-300 hover:underline">Logout</a>
+                        <?php if (isset($user['role']) && $user['role'] === 'admin'): ?>
+                            <a href="<?= site_url('admin') ?>" class="ml-3 text-indigo-300 hover:underline">Admin Panel</a>
+                        <?php endif; ?>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
 
