@@ -21,7 +21,9 @@
     </div>
 
     <!-- Form -->
+    <?php $current_page = isset($_GET['page']) ? (int) $_GET['page'] : 1; ?>
     <form action="<?=site_url('users/create')?>" method="POST" class="space-y-5">
+      <input type="hidden" name="page" value="<?= $current_page ?>">
       
       <!-- First Name -->
       <div>

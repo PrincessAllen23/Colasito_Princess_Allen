@@ -14,7 +14,32 @@ class UsersController extends Controller {
     // Show all users
     public function index()
     {
-        $data['users'] = $this->UsersModel->all(); // fixed: all() not All()
+        // Pagination settings
+        $per_page = 10; // rows per page (changeable)
+        // Get current page from URL segment or query - framework doesn't provide segment helper for numeric index reliably
+        $page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int) $_GET['page'] : 1;
+
+        // Use model paginate helper (returns data, total, etc.)
+        $paginated = $this->UsersModel->paginate($per_page, $page);
+
+        // Load Pagination library and initialize
+        $this->call->library('Pagination');
+        $pagination = new Pagination();
+        $base_url = 'users'; // base route for pages
+    $pagination->set_theme('tailwind');
+    // Use query string for page links so controller can read $_GET['page']
+    $pagination->set_options(['page_delimiter' => '?page=']);
+    $pagination->initialize($paginated['total'], $per_page, $paginated['current_page'], $base_url, 5);
+
+        $data['users'] = $paginated['data'];
+        $data['pagination_html'] = $pagination->paginate();
+        $data['pagination_meta'] = [
+            'total' => $paginated['total'],
+            'per_page' => $paginated['per_page'],
+            'current_page' => $paginated['current_page'],
+            'last_page' => $paginated['last_page']
+        ];
+
         $this->call->view('users/index', $data);
     }
 
@@ -32,7 +57,8 @@ class UsersController extends Controller {
             ];
 
             if($this->UsersModel->insert($data)){
-                redirect(site_url('/')); // fixed redirect
+                $page = $this->io->post('page') ? (int) $this->io->post('page') : 1;
+                redirect(site_url('users') . '?page=' . $page);
             }else{
                 echo "Error in creating user.";
             }
@@ -49,7 +75,7 @@ class UsersController extends Controller {
             return;
         }
 
-        if($this->io->method() == 'post'){
+    if($this->io->method() == 'post'){
             $fname = $this->io->post('fname');
             $lname = $this->io->post('lname');
             $email = $this->io->post('email');
@@ -61,7 +87,8 @@ class UsersController extends Controller {
             ];
 
             if($this->UsersModel->update($id, $data)){
-                redirect(site_url('/')); // fixed redirect
+                $page = $this->io->post('page') ? (int) $this->io->post('page') : 1;
+                redirect(site_url('users') . '?page=' . $page);
             }else{
                 echo "Error in updating user.";
             }
@@ -74,7 +101,9 @@ class UsersController extends Controller {
     // Delete user
     function delete($id){
         if($this->UsersModel->delete($id)){
-            redirect(site_url('/')); // fixed redirect
+            // preserve page if provided via GET
+            $page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int) $_GET['page'] : 1;
+            redirect(site_url('users') . '?page=' . $page);
         }else{
             echo "Error in deleting user.";
         }

@@ -45,30 +45,41 @@
                     </tr>
                 </thead>
                 <tbody class="text-sm">
-                    <?php foreach(html_escape($users) as $user): ?>
-                        <tr class="hover:bg-white hover:bg-opacity-5 transition duration-200">
-                            <td class="py-4 px-4 font-medium"><?=($user['id']);?></td>
-                            <td class="py-4 px-4"><?=($user['lname']);?></td>
-                            <td class="py-4 px-4"><?=($user['fname']);?></td>
-                            <td class="py-4 px-4">
-                                <span class="bg-cyan-500 bg-opacity-50 text-white text-xs font-semibold px-3 py-1 rounded-full">
-                                    <?=($user['email']);?>
-                                </span>
-                            </td>
-                            <td class="py-4 px-4 flex justify-center gap-4">
-                                <a href="<?=site_url('users/update/'.$user['id']);?>"
-                                    class="text-green-300 hover:text-green-500 transition-colors" title="Update">
-                                    <i class="fa-solid fa-pen-to-square text-lg"></i>
-                                </a>
-                                <a href="<?=site_url('users/delete/'.$user['id']);?>"
-                                    class="text-red-300 hover:text-red-500 transition-colors" title="Delete">
-                                    <i class="fa-solid fa-trash text-lg"></i>
-                                </a>
-                            </td>
+                    <?php if (!empty($users) && is_array($users)): ?>
+                        <?php foreach($users as $user): ?>
+                            <tr class="hover:bg-white hover:bg-opacity-5 transition duration-200">
+                                <td class="py-4 px-4 font-medium"><?=($user['id']);?></td>
+                                <td class="py-4 px-4"><?=($user['lname']);?></td>
+                                <td class="py-4 px-4"><?=($user['fname']);?></td>
+                                <td class="py-4 px-4">
+                                    <span class="bg-cyan-500 bg-opacity-50 text-white text-xs font-semibold px-3 py-1 rounded-full">
+                                        <?=($user['email']);?>
+                                    </span>
+                                </td>
+                                <td class="py-4 px-4 flex justify-center gap-4">
+                                    <a href="<?=site_url('users/update/'.$user['id']);?>"
+                                        class="text-green-300 hover:text-green-500 transition-colors" title="Update">
+                                        <i class="fa-solid fa-pen-to-square text-lg"></i>
+                                    </a>
+                                    <a href="<?=site_url('users/delete/'.$user['id']);?>"
+                                        class="text-red-300 hover:text-red-500 transition-colors" title="Delete">
+                                        <i class="fa-solid fa-trash text-lg"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <tr>
+                            <td colspan="5" class="py-8 px-4 text-center text-gray-200">No users found.</td>
                         </tr>
-                    <?php endforeach; ?>
+                    <?php endif; ?>
                 </tbody>
             </table>
+        </div>
+        <div class="mt-6">
+            <?php if(!empty($pagination_html)): ?>
+                <?= $pagination_html; ?>
+            <?php endif; ?>
         </div>
     </div>
 </body>
