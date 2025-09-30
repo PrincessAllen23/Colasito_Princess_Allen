@@ -28,8 +28,11 @@ class AuthController extends Controller {
             }
         } else {
             // Ensure default admin exists (safe check, will not duplicate)
-            $this->ensure_default_admin();
-            $this->call->view('auth/login');
+            $notice = $this->ensure_default_admin();
+            if ($notice) {
+                $data['notice'] = $notice;
+            }
+            $this->call->view('auth/login', isset($data) ? $data : []);
         }
     }
 
@@ -85,7 +88,11 @@ class AuthController extends Controller {
                 $this->call->view('auth/register', $data);
             }
         } else {
-            $this->call->view('auth/register');
+            $notice = $this->ensure_default_admin();
+            if ($notice) {
+                $data['notice'] = $notice;
+            }
+            $this->call->view('auth/register', isset($data) ? $data : []);
         }
     }
 
@@ -99,14 +106,20 @@ class AuthController extends Controller {
         $admin = $this->UsersModel->filter(['email' => $admin_email])->get();
         if ($admin) return; // already exists
 
-        // create with hashed password and role admin
-        $hash = password_hash($admin_password, PASSWORD_DEFAULT);
-        $this->UsersModel->insert([
-            'email' => $admin_email,
-            'fname' => 'Admin',
-            'lname' => 'User',
-            'password' => $hash,
-            'role' => 'admin'
-        ]);
+        // Only attempt to insert admin if the necessary columns exist
+        if ($this->UsersModel->has_columns(['password', 'role'])) {
+            $hash = password_hash($admin_password, PASSWORD_DEFAULT);
+            $this->UsersModel->insert([
+                'email' => $admin_email,
+                'fname' => 'Admin',
+                'lname' => 'User',
+                'password' => $hash,
+                'role' => 'admin'
+            ]);
+            return null; // no notice
+        }
+
+        // If columns are missing, return a friendly notice for the views to display
+        return 'Database is missing required columns (password, role). Run the migration in migrations/001_add_auth_columns.sql and re-try.';
     }
 }

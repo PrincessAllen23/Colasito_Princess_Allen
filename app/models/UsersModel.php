@@ -59,4 +59,25 @@ class UsersModel extends Model {
                         ->where($this->primary_key, $id)
                         ->delete();
     }
+
+    /**
+     * Check if given columns exist in the table
+     *
+     * @param array $cols
+     * @return bool
+     */
+    public function has_columns(array $cols)
+    {
+        try {
+            $rows = $this->db->raw("SHOW COLUMNS FROM {$this->table}")->fetchAll(PDO::FETCH_ASSOC);
+            $existing = array_map(function($r){ return $r['Field']; }, $rows);
+            foreach ($cols as $c) {
+                if (!in_array($c, $existing)) return false;
+            }
+            return true;
+        } catch (Exception $e) {
+            // If SHOW COLUMNS fails (permission or other), return false so caller can handle
+            return false;
+        }
+    }
 }
