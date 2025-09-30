@@ -184,7 +184,7 @@ $config['error_view_path']         	= '';
 |	if you have 'default folder' and '404.php file' inside error folder in view
 |
 */
-$config['404_override']       	    = '';
+$config['404_override']       	    = 'DebugController::show404';
 
 /*
 |--------------------------------------------------------------------------
