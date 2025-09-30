@@ -70,3 +70,10 @@ $router->get('/__debug_router', function() {
 		echo $k . ': ' . $v . "\n";
 	}
 });
+
+// Aliases for servers that include index.php in the URL (some hosts)
+$router->match('/index.php', 'UsersController::index', ['GET']);
+$router->match('/index.php/', 'UsersController::index', ['GET']);
+$router->match('/index.php/auth/login', 'AuthController::login', ['GET', 'POST']);
+$router->match('/index.php/auth/register', 'AuthController::register', ['GET', 'POST']);
+$router->get('/index.php/auth/logout', 'AuthController::logout');
