@@ -40,6 +40,11 @@ class UsersController extends Controller {
             'current_page' => $paginated['current_page'],
             'last_page' => $paginated['last_page']
         ];
+        // Debug info (development only): show total rows and a sample of results
+        if (strtolower(config_item('ENVIRONMENT')) === 'development') {
+            $data['debug_db_total'] = $paginated['total'];
+            $data['debug_db_sample'] = array_slice($paginated['data'], 0, 5);
+        }
 
         $this->call->view('users/index', $data);
     }
