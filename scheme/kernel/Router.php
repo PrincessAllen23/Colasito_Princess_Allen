@@ -346,6 +346,12 @@ class Router
         array_shift($url_segments);
         foreach($url_segments as $uri)
         {
+            // Skip empty segments (can happen with leading/trailing or consecutive slashes)
+            if ($uri === '' || $uri === null) {
+                continue;
+            }
+
+            // Validate sanitized segment characters
             if (! preg_match('/^['.config_item('permitted_uri_chars').']+$/i', $uri))
             {
                 show_error('400 Bad Request', 'The URI you submitted has disallowed characters.', 'error_general', 400);
