@@ -67,6 +67,11 @@ class Router
         $url = rtrim($url, '/');
         $url = filter_var($url, FILTER_SANITIZE_URL);
 
+        // If the sanitized URL becomes an empty string, treat it as the root '/'
+        if ($url === '') {
+            return '/';
+        }
+
         return $url;
     }
 
