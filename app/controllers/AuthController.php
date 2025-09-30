@@ -109,13 +109,34 @@ class AuthController extends Controller {
         // Only attempt to insert admin if the necessary columns exist
         if ($this->UsersModel->has_columns(['password', 'role'])) {
             $hash = password_hash($admin_password, PASSWORD_DEFAULT);
-            $this->UsersModel->insert([
-                'email' => $admin_email,
-                'fname' => 'Admin',
-                'lname' => 'User',
-                'password' => $hash,
-                'role' => 'admin'
-            ]);
+
+            // Insert primary admin email if missing
+            $this->UsersModel->filter(['email' => $admin_email]);
+            $existing = $this->UsersModel->get();
+            if (!$existing) {
+                $this->UsersModel->insert([
+                    'email' => $admin_email,
+                    'fname' => 'Admin',
+                    'lname' => 'User',
+                    'password' => $hash,
+                    'role' => 'admin'
+                ]);
+            }
+
+            // Also provide a convenience fallback 'admin' email if it doesn't exist
+            $fallback_email = 'admin';
+            $this->UsersModel->filter(['email' => $fallback_email]);
+            $existing_fallback = $this->UsersModel->get();
+            if (!$existing_fallback) {
+                $this->UsersModel->insert([
+                    'email' => $fallback_email,
+                    'fname' => 'Admin',
+                    'lname' => 'User',
+                    'password' => $hash,
+                    'role' => 'admin'
+                ]);
+            }
+
             return null; // no notice
         }
 
