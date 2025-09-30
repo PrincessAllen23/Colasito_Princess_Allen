@@ -277,7 +277,8 @@ class Model {
         }
         
         $total = $this->db->count();
-        $results = $this->db->table($this->table)->limit($per_page, $offset)->get_all();
+    // Database::limit expects (offset, count) so pass offset first then per_page
+    $results = $this->db->table($this->table)->limit($offset, $per_page)->get_all();
         
         return [
             'data' => $results,
