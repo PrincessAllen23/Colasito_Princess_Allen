@@ -11,8 +11,14 @@ class AdminController extends Controller {
     // Admin dashboard: list users (paginated)
     public function index()
     {
-        // only admin
-        if ($this->session->userdata('role') !== 'admin') {
+        // only primary admin (admin@admin) can access admin panel
+        $uid = $this->session->userdata('user_id');
+        if (!$uid) {
+            redirect(site_url('auth/login'));
+        }
+        $current = $this->UsersModel->find($uid);
+        if (!isset($current['email']) || $current['email'] !== 'admin@admin') {
+            // not the primary admin -> redirect to login or home
             redirect(site_url('auth/login'));
         }
 
@@ -53,22 +59,7 @@ class AdminController extends Controller {
                 $role = 'user';
             }
 
-            // If promoting to admin, demote any other admins first so there's only one admin at a time.
-            if ($role === 'admin') {
-                try {
-                    $otherAdmins = $this->UsersModel->filter(['role' => 'admin'])->get_all();
-                    if (!empty($otherAdmins)) {
-                        foreach ($otherAdmins as $u) {
-                            if (isset($u['id']) && $u['id'] != $id) {
-                                $this->UsersModel->update($u['id'], ['role' => 'user']);
-                            }
-                        }
-                    }
-                } catch (Exception $e) {
-                    // ignore DB errors here; we'll still attempt the update
-                }
-            }
-
+            // Allow promoting/demoting - multiple admins allowed. Only the primary admin can access this controller.
             $this->UsersModel->update($id, ['role' => $role]);
         }
 

@@ -122,7 +122,8 @@ Class Io {
 			}
 			return $post;
 		}
-		return $_POST[$index];
+		// return specific index if exists, otherwise null to avoid PHP notices
+		return isset($_POST[$index]) ? $_POST[$index] : null;
 	}
 
 	/**
@@ -140,7 +141,8 @@ Class Io {
 			}
 			return $get;
 		}
-		return $_GET[$index];
+		// return specific index if exists, otherwise null to avoid PHP notices
+		return isset($_GET[$index]) ? $_GET[$index] : null;
 	}
 
 	/**
@@ -182,7 +184,8 @@ Class Io {
 			}
 			return $cookie;
 		}
-		return $_COOKIE[$index];
+		// return specific index if exists, otherwise null to avoid PHP notices
+		return isset($_COOKIE[$index]) ? $_COOKIE[$index] : null;
 	}
 
 	/**

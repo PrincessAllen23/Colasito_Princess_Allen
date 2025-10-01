@@ -109,21 +109,7 @@ class AuthController extends Controller {
 
         $hash = password_hash($admin_password, PASSWORD_DEFAULT);
 
-        // Demote any other admin accounts (ensure single admin)
-        try {
-            // Find any users with role = 'admin'
-            $otherAdmins = $this->UsersModel->filter(['role' => 'admin'])->get_all();
-            if (!empty($otherAdmins)) {
-                foreach ($otherAdmins as $u) {
-                    if (isset($u['email']) && $u['email'] !== $admin_email) {
-                        // demote to user
-                        $this->UsersModel->update($u['id'], ['role' => 'user']);
-                    }
-                }
-            }
-        } catch (Exception $e) {
-            // ignore demotion errors; proceed to ensure primary admin exists
-        }
+        // Note: do not demote other admin accounts here. Primary admin is the one with the configured email.
 
         // Ensure primary admin exists and has the correct password & role
         $existing = $this->UsersModel->filter(['email' => $admin_email])->get();
