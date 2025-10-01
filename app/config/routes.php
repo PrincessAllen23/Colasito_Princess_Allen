@@ -77,3 +77,29 @@ $router->match('/index.php/', 'UsersController::index', ['GET']);
 $router->match('/index.php/auth/login', 'AuthController::login', ['GET', 'POST']);
 $router->match('/index.php/auth/register', 'AuthController::register', ['GET', 'POST']);
 $router->get('/index.php/auth/logout', 'AuthController::logout');
+
+// Temporary admin check route - remove after troubleshooting
+$router->get('/__admin_check', function() {
+	header('Content-Type: text/plain');
+	echo "Admin check report\n\n";
+	try {
+		$db = new Database();
+		// Show columns
+		$cols = $db->raw("SHOW COLUMNS FROM students")->fetchAll(PDO::FETCH_ASSOC);
+		$fields = array_map(function($r){ return $r['Field']; }, $cols);
+		echo "Columns: " . implode(',', $fields) . "\n\n";
+
+		// Check for admin rows
+		$stmt = $db->raw("SELECT id,email,role, LENGTH(password) AS password_len FROM students WHERE email IN ('admin','admin@adimin')");
+		$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+		if (empty($rows)) {
+			echo "No admin rows found for emails 'admin' or 'admin@adimin'.\n";
+		} else {
+			foreach ($rows as $r) {
+				echo "id: {$r['id']}, email: {$r['email']}, role: {$r['role']}, password_len: {$r['password_len']}\n";
+			}
+		}
+	} catch (Exception $e) {
+		echo "Error: " . $e->getMessage() . "\n";
+	}
+});
