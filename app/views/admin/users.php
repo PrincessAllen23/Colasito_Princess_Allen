@@ -10,6 +10,14 @@
     <div class="max-w-6xl mx-auto">
         <h1 class="text-3xl font-bold mb-6">Admin - Users</h1>
         <div class="bg-gray-800 p-6 rounded-lg shadow">
+            <div class="flex justify-between items-center mb-4">
+                <?php $page_q = isset($_GET['page']) ? '?page='.(int)$_GET['page'] : ''; ?>
+                <?php if (isset($_GET['q']) && $_GET['q'] !== '') { $page_q = '?q=' . urlencode($_GET['q']) . (isset($_GET['page']) ? '&page='.(int)$_GET['page'] : ''); } ?>
+                <a href="<?= site_url('') . $page_q ?>" class="inline-flex items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded text-sm">
+                    <i class="fa-solid fa-arrow-left"></i> Back to Users
+                </a>
+                <div></div>
+            </div>
             <table class="w-full text-left">
                 <thead>
                     <tr class="text-sm text-gray-300">
