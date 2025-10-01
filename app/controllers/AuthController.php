@@ -98,49 +98,51 @@ class AuthController extends Controller {
 
     protected function ensure_default_admin()
     {
-        // default admin credentials
-        $admin_email = 'admin@adimin';
+        // default admin credentials (single admin)
+        $admin_email = 'admin@admin';
         $admin_password = 'aldge042224';
 
-        // check if admin exists
-        $admin = $this->UsersModel->filter(['email' => $admin_email])->get();
-        if ($admin) return; // already exists
-
-        // Only attempt to insert admin if the necessary columns exist
-        if ($this->UsersModel->has_columns(['password', 'role'])) {
-            $hash = password_hash($admin_password, PASSWORD_DEFAULT);
-
-            // Insert primary admin email if missing
-            $this->UsersModel->filter(['email' => $admin_email]);
-            $existing = $this->UsersModel->get();
-            if (!$existing) {
-                $this->UsersModel->insert([
-                    'email' => $admin_email,
-                    'fname' => 'Admin',
-                    'lname' => 'User',
-                    'password' => $hash,
-                    'role' => 'admin'
-                ]);
-            }
-
-            // Also provide a convenience fallback 'admin' email if it doesn't exist
-            $fallback_email = 'admin';
-            $this->UsersModel->filter(['email' => $fallback_email]);
-            $existing_fallback = $this->UsersModel->get();
-            if (!$existing_fallback) {
-                $this->UsersModel->insert([
-                    'email' => $fallback_email,
-                    'fname' => 'Admin',
-                    'lname' => 'User',
-                    'password' => $hash,
-                    'role' => 'admin'
-                ]);
-            }
-
-            return null; // no notice
+        // If required columns are missing, do not attempt DB writes
+        if (! $this->UsersModel->has_columns(['password', 'role'])) {
+            return 'Database is missing required columns (password, role). Run the migration in migrations/001_add_auth_columns.sql and re-try.';
         }
 
-        // If columns are missing, return a friendly notice for the views to display
-        return 'Database is missing required columns (password, role). Run the migration in migrations/001_add_auth_columns.sql and re-try.';
+        $hash = password_hash($admin_password, PASSWORD_DEFAULT);
+
+        // Demote any other admin accounts (ensure single admin)
+        try {
+            // Find any users with role = 'admin'
+            $otherAdmins = $this->UsersModel->filter(['role' => 'admin'])->get_all();
+            if (!empty($otherAdmins)) {
+                foreach ($otherAdmins as $u) {
+                    if (isset($u['email']) && $u['email'] !== $admin_email) {
+                        // demote to user
+                        $this->UsersModel->update($u['id'], ['role' => 'user']);
+                    }
+                }
+            }
+        } catch (Exception $e) {
+            // ignore demotion errors; proceed to ensure primary admin exists
+        }
+
+        // Ensure primary admin exists and has the correct password & role
+        $existing = $this->UsersModel->filter(['email' => $admin_email])->get();
+        if ($existing) {
+            // Update password and role if necessary
+            $update = [];
+            $update['password'] = $hash;
+            $update['role'] = 'admin';
+            $this->UsersModel->update($existing['id'], $update);
+        } else {
+            $this->UsersModel->insert([
+                'email' => $admin_email,
+                'fname' => 'Admin',
+                'lname' => 'User',
+                'password' => $hash,
+                'role' => 'admin'
+            ]);
+        }
+
+        return null; // success
     }
 }

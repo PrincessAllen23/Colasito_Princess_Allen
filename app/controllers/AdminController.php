@@ -53,6 +53,22 @@ class AdminController extends Controller {
                 $role = 'user';
             }
 
+            // If promoting to admin, demote any other admins first so there's only one admin at a time.
+            if ($role === 'admin') {
+                try {
+                    $otherAdmins = $this->UsersModel->filter(['role' => 'admin'])->get_all();
+                    if (!empty($otherAdmins)) {
+                        foreach ($otherAdmins as $u) {
+                            if (isset($u['id']) && $u['id'] != $id) {
+                                $this->UsersModel->update($u['id'], ['role' => 'user']);
+                            }
+                        }
+                    }
+                } catch (Exception $e) {
+                    // ignore DB errors here; we'll still attempt the update
+                }
+            }
+
             $this->UsersModel->update($id, ['role' => $role]);
         }
 
