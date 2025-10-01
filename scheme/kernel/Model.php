@@ -292,11 +292,11 @@ class Model {
             $this->db->or_like('email', $term);
         }
 
-        // get total after filters
-        $total = $this->db->count();
+    // get total after filters (count will use current WHERE and bind values)
+    $total = $this->db->count();
 
-        // Database::limit expects (offset, count) so pass offset first then per_page
-        $results = $this->db->table($this->table)->limit($offset, $per_page)->get_all();
+    // Database::limit expects (offset, count). Do not call table() again as it resets filters/bindings.
+    $results = $this->db->limit($offset, $per_page)->get_all();
         
         return [
             'data' => $results,

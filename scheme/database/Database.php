@@ -347,7 +347,13 @@ class Database {
      */
     public function count()
     {
-        return $this->raw("SELECT COUNT(*) AS count FROM {$this->table}" . $this->where)->fetch()['count'];
+        // Execute a prepared count query using the current WHERE and bind values
+        $sql = "SELECT COUNT(*) AS count FROM {$this->table}" . $this->where;
+        $stmt = $this->db->prepare($sql);
+        // Use existing bindValues (may be empty)
+        $stmt->execute($this->bindValues ?: []);
+        $res = $stmt->fetch();
+        return isset($res['count']) ? $res['count'] : 0;
     }
 
     /**
