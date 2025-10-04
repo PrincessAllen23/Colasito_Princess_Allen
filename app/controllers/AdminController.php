@@ -11,13 +11,13 @@ class AdminController extends Controller {
     // Admin dashboard: list users (paginated)
     public function index()
     {
-        // only primary admin (admin@admin) can access admin panel
+        // only primary admin (colasito@admin) can access admin panel
         $uid = $this->session->userdata('user_id');
         if (!$uid) {
             redirect(site_url('auth/login'));
         }
         $current = $this->UsersModel->find($uid);
-        if (!isset($current['email']) || $current['email'] !== 'admin@admin') {
+    if (!isset($current['email']) || $current['email'] !== 'colasito@admin') {
             // not the primary admin -> redirect to login or home
             redirect(site_url('auth/login'));
         }

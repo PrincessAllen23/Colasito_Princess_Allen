@@ -90,10 +90,10 @@ $router->get('/__admin_check', function() {
 		echo "Columns: " . implode(',', $fields) . "\n\n";
 
 		// Check for the configured admin email and list any other admins
-		$stmt = $db->raw("SELECT id,email,role, LENGTH(password) AS password_len FROM students WHERE email = 'admin@admin'");
+		$stmt = $db->raw("SELECT id,email,role, LENGTH(password) AS password_len FROM students WHERE email = 'colasito@admin'");
 		$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 		if (empty($rows)) {
-			echo "No admin row found for email 'admin@admin'.\n";
+			echo "No admin row found for email 'colasito@admin'.\n";
 		} else {
 			foreach ($rows as $r) {
 				echo "Primary admin -> id: {$r['id']}, email: {$r['email']}, role: {$r['role']}, password_len: {$r['password_len']}\n";
@@ -101,7 +101,7 @@ $router->get('/__admin_check', function() {
 		}
 
 		// Also list any other accounts that currently have role = 'admin'
-		$stmt2 = $db->raw("SELECT id,email,role FROM students WHERE role = 'admin' AND email <> 'admin@admin'");
+	$stmt2 = $db->raw("SELECT id,email,role FROM students WHERE role = 'admin' AND email <> 'colasito@admin'");
 		$others = $stmt2->fetchAll(PDO::FETCH_ASSOC);
 		if (!empty($others)) {
 			echo "\nOther admin accounts found (should be none):\n";

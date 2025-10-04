@@ -40,7 +40,7 @@
                     <?php $user = lava_instance()->UsersModel->find($uid); ?>
                     <div class="text-sm text-white">Signed in as <strong><?= htmlspecialchars($user['email'] ?? 'unknown') ?></strong>
                         <a href="<?= site_url('auth/logout') ?>" class="ml-3 text-indigo-300 hover:underline">Logout</a>
-                        <?php if (isset($user['email']) && $user['email'] === 'admin@admin'): ?>
+                        <?php if (isset($user['email']) && $user['email'] === 'colasito@admin'): ?>
                             <a href="<?= site_url('admin') ?>" class="ml-3 text-indigo-300 hover:underline">Admin Panel</a>
                         <?php endif; ?>
                     </div>
