@@ -82,7 +82,7 @@ $autoload['libraries'] = array('database', 'upload', 'session');
 |
 |	$autoload['helpers'] = array('url', 'file');
 */
-$autoload['helpers'] = array('url');
+$autoload['helpers'] = array('url', 'avatar');
 
 /*
 | -------------------------------------------------------------------

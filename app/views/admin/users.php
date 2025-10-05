@@ -19,8 +19,8 @@
         <table class="w-full text-left">
             <thead>
                 <tr class="text-sm text-gray-300">
-                    <th class="p-2">ID</th>
-                    <th class="p-2">Email</th>
+                    <th class="p-2">#</th>
+                    <th class="p-2">User</th>
                     <th class="p-2">Name</th>
                     <th class="p-2">Role</th>
                     <th class="p-2">Actions</th>
@@ -28,12 +28,19 @@
             </thead>
             <tbody class="text-gray-200">
                 <?php foreach ($users as $u): ?>
-                    <tr class="border-t border-gray-700">
-                        <td class="p-2"><?= $u['id'] ?></td>
-                        <td class="p-2"><?= htmlspecialchars($u['email']) ?></td>
-                        <td class="p-2"><?= htmlspecialchars(($u['fname'] ?? '') . ' ' . ($u['lname'] ?? '')) ?></td>
-                        <td class="p-2"><?= htmlspecialchars($u['role'] ?? 'user') ?></td>
-                        <td class="p-2">
+                    <?php $full = trim(($u['fname'] ?? '') . ' ' . ($u['lname'] ?? '')); ?>
+                    <tr class="border-t border-gray-700 hover:bg-white/2 transition-colors">
+                        <td class="p-3 font-medium text-sm"><?= $u['id'] ?></td>
+                        <td class="p-3 flex items-center gap-3">
+                            <div class="w-10 h-10"><?= avatar_for($u['email'] ?? null, $full ?: ($u['email'] ?? null), 40) ?></div>
+                            <div class="text-left">
+                                <div class="text-sm font-semibold"><?= htmlspecialchars($u['email']) ?></div>
+                                <div class="text-xs text-gray-400"><?= htmlspecialchars($full ?: '—') ?></div>
+                            </div>
+                        </td>
+                        <td class="p-3"><?= htmlspecialchars($full ?: '—') ?></td>
+                        <td class="p-3"><span class="px-2 py-1 rounded-full bg-white/5 text-xs"><?= htmlspecialchars($u['role'] ?? 'user') ?></span></td>
+                        <td class="p-3">
                             <form method="post" action="<?= site_url('admin/set_role/'.$u['id']) ?><?= isset($_GET['page']) ? '?page='.(int)$_GET['page'] : '' ?>">
                                 <select name="role" class="bg-gray-700 text-white px-2 py-1 rounded">
                                     <option value="user" <?= (isset($u['role']) && $u['role'] === 'user') ? 'selected' : '' ?>>User</option>
