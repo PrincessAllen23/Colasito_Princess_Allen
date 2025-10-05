@@ -27,8 +27,8 @@
     <div class="max-w-6xl mx-auto mt-10 p-8 rounded-3xl glass-container">
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-4xl font-extrabold text-white drop-shadow-lg flex items-center gap-4">
-                <span class="inline-block w-14 h-14 rounded-full bg-gradient-to-br from-indigo-500 to-cyan-400 flex items-center justify-center text-2xl shadow-md">UD</span>
-                User Directory
+                <span class="inline-block w-14 h-14 rounded-full bg-gradient-to-br from-indigo-500 to-cyan-400 flex items-center justify-center text-2xl shadow-md">SI</span>
+                Student Information
             </h1>
             <div class="flex items-center gap-4">
                 <form method="get" action="<?=site_url('')?>" class="flex items-center gap-2">
@@ -41,18 +41,11 @@
                 <?php $uid = function_exists('lava_instance') ? lava_instance()->session->userdata('user_id') : null; ?>
                 <?php if ($uid): ?>
                     <?php $user = lava_instance()->UsersModel->find($uid); ?>
-                    <?php $displayName = trim(($user['fname'] ?? '') . ' ' . ($user['lname'] ?? '')) ?: ($user['email'] ?? ''); ?>
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10"><?= avatar_for($user['email'] ?? null, $displayName, 40) ?></div>
-                        <div class="text-sm text-white">
-                            <div class="font-semibold"><?= htmlspecialchars($displayName) ?></div>
-                            <div class="text-xs">
-                                <a href="<?= site_url('auth/logout') ?>" class="text-indigo-200 hover:underline">Logout</a>
-                                <?php if (isset($user['email']) && $user['email'] === 'colasito@admin'): ?>
-                                    <a href="<?= site_url('admin') ?>" class="ml-3 text-indigo-200 hover:underline">Admin Panel</a>
-                                <?php endif; ?>
-                            </div>
-                        </div>
+                    <div class="text-sm text-white">Signed in as <strong><?= htmlspecialchars($user['email'] ?? 'unknown') ?></strong>
+                        <a href="<?= site_url('auth/logout') ?>" class="ml-3 text-indigo-300 hover:underline">Logout</a>
+                        <?php if (isset($user['email']) && $user['email'] === 'admin@admin'): ?>
+                            <a href="<?= site_url('admin') ?>" class="ml-3 text-indigo-300 hover:underline">Admin Panel</a>
+                        <?php endif; ?>
                     </div>
                 <?php endif; ?>
             </div>
@@ -74,11 +67,8 @@
                         <?php foreach($users as $user): ?>
                             <tr class="hover:bg-white hover:bg-opacity-5 transition duration-200">
                                 <td class="py-4 px-4 font-medium"><?=($user['id']);?></td>
-                                <td class="py-4 px-4 flex items-center gap-3">
-                                    <?= avatar_for($user['email'] ?? null, trim(($user['fname'] ?? '') . ' ' . ($user['lname'] ?? '')), 36) ?>
-                                </td>
-                                <td class="py-4 px-4><?=($user['lname']);?></td>
-                                <td class="py-4 px-4><?=($user['fname']);?></td>
+                                <td class="py-4 px-4"><?=($user['lname']);?></td>
+                                <td class="py-4 px-4"><?=($user['fname']);?></td>
                                 <td class="py-4 px-4">
                                     <span class="bg-cyan-500 bg-opacity-50 text-white text-xs font-semibold px-3 py-1 rounded-full">
                                         <?=($user['email']);?>
