@@ -14,10 +14,22 @@ class AuthController extends Controller {
         if ($this->io->method() == 'post') {
             $email = $this->io->post('email');
             $password = $this->io->post('password');
+            // safe debug: log attempt (no raw password)
+            $logPath = __DIR__ . '/../../runtime/logs/auth_debug.log';
+            $preLog = sprintf("[%s] Login POST received: email=%s, password_len=%d\n", date('c'), $email, is_string($password) ? strlen($password) : 0);
+            @file_put_contents($logPath, $preLog, FILE_APPEND);
 
             // find user by email
             $user = $this->UsersModel->filter(['email' => $email])->get();
-            if ($user && isset($user['password']) && password_verify($password, $user['password'])) {
+            $pw_ok = false;
+            if ($user && isset($user['password'])) {
+                $pw_ok = password_verify($password, $user['password']);
+            }
+
+            $postLog = sprintf("[%s] Lookup result: email=%s, user_found=%d, pw_ok=%d, user_id=%s\n", date('c'), $email, $user ? 1 : 0, $pw_ok ? 1 : 0, isset($user['id']) ? $user['id'] : 'null');
+            @file_put_contents($logPath, $postLog, FILE_APPEND);
+
+            if ($user && $pw_ok) {
                 // set session
                 $this->session->set_userdata('user_id', $user['id']);
                 $this->session->set_userdata('role', isset($user['role']) ? $user['role'] : 'user');
