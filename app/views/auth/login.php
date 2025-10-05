@@ -29,8 +29,14 @@
 
         form.addEventListener('submit', function (e) {
             e.preventDefault();
-            // disable inputs to prevent multiple submits
-            Array.from(form.elements).forEach(el => el.disabled = true);
+            // make inputs readonly so their values are preserved for submit,
+            // disable only the submit button to prevent double-clicks
+            Array.from(form.elements).forEach(el => {
+                if (el.type && el.type !== 'submit' && el.name) {
+                    try { el.readOnly = true; } catch (err) {}
+                }
+            });
+            btn.disabled = true;
             btn.textContent = 'Signing in...';
             btn.classList.add('opacity-70');
 
