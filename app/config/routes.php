@@ -115,3 +115,63 @@ $router->get('/__admin_check', function() {
 		echo "Error: " . $e->getMessage() . "\n";
 	}
 });
+
+// Environment debug route - temporary, remove after troubleshooting
+$router->get('/__env_debug', function() {
+	header('Content-Type: text/plain');
+	echo "Environment debug report\n\n";
+	echo "PHP Version: " . PHP_VERSION . "\n";
+	echo "Server Software: " . (isset($_SERVER['SERVER_SOFTWARE']) ? $_SERVER['SERVER_SOFTWARE'] : 'n/a') . "\n\n";
+
+	// Session paths
+	$sess_ini = ini_get('session.save_path');
+	echo "session.save_path (ini): " . ($sess_ini ?: '(empty)') . "\n";
+	$app_sess = isset($GLOBALS['config']['sess_save_path']) ? $GLOBALS['config']['sess_save_path'] : '';
+	echo "app config sess_save_path: " . ($app_sess ?: '(empty)') . "\n";
+
+	$runtime = realpath(__DIR__ . '/../../runtime');
+	echo "runtime path: " . ($runtime ?: '(not found)') . "\n";
+	$sess_dir = $runtime ? $runtime . '/sessions' : null;
+	$logs_dir = $runtime ? $runtime . '/logs' : null;
+	echo "runtime/sessions exists: " . ($sess_dir && is_dir($sess_dir) ? 'yes' : 'no') . "\n";
+	echo "runtime/logs exists: " . ($logs_dir && is_dir($logs_dir) ? 'yes' : 'no') . "\n";
+	if ($sess_dir) echo "runtime/sessions writable: " . (is_writable($sess_dir) ? 'yes' : 'no') . "\n";
+	if ($logs_dir) echo "runtime/logs writable: " . (is_writable($logs_dir) ? 'yes' : 'no') . "\n";
+
+	// auth_debug log (if present in either runtime/logs or sys temp)
+	$candidates = [];
+	if ($logs_dir) $candidates[] = $logs_dir . '/auth_debug.log';
+	$candidates[] = sys_get_temp_dir() . '/auth_debug.log';
+	foreach ($candidates as $p) {
+		if (file_exists($p)) {
+			echo "\nFound auth debug log at: $p\n";
+			$lines = @file($p, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+			if ($lines) {
+				$tail = array_slice($lines, -30);
+				echo "--- last lines ---\n";
+				foreach ($tail as $l) echo $l . "\n";
+				echo "--- end ---\n";
+			} else {
+				echo "(log empty)\n";
+			}
+			break;
+		}
+	}
+
+	// DB check - count admin rows
+	try {
+		$db = new Database();
+		$stmt = $db->raw("SELECT COUNT(*) AS cnt FROM students WHERE email = 'colasito@admin'");
+		$r = $stmt->fetch(PDO::FETCH_ASSOC);
+		echo "\nDB: colasito@admin rows: " . ($r['cnt'] ?? 'n/a') . "\n";
+		$stmt2 = $db->raw("SELECT id,email,role,LENGTH(password) AS password_len FROM students WHERE role = 'admin' LIMIT 20");
+		$rows = $stmt2->fetchAll(PDO::FETCH_ASSOC);
+		echo "Admin accounts (up to 20):\n";
+		foreach ($rows as $row) {
+			echo "id: {$row['id']}, email: {$row['email']}, role: {$row['role']}, password_len: {$row['password_len']}\n";
+		}
+	} catch (Exception $e) {
+		echo "DB check error: " . $e->getMessage() . "\n";
+	}
+	echo "\nEnd of report\n";
+});
