@@ -22,11 +22,12 @@ class AdminController extends Controller {
             redirect(site_url('auth/login'));
         }
 
-        $per_page = 20;
-        $page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int) $_GET['page'] : 1;
+    $per_page = 20;
+    $page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int) $_GET['page'] : 1;
+    $q = isset($_GET['q']) ? trim($_GET['q']) : '';
 
-        // reuse paginate in Model; pass empty search to get all
-        $paginated = $this->UsersModel->paginate($per_page, $page, '');
+    // reuse paginate in Model; pass search query
+    $paginated = $this->UsersModel->paginate($per_page, $page, $q);
 
         $this->call->library('Pagination');
         $pagination = new Pagination();
@@ -34,8 +35,9 @@ class AdminController extends Controller {
         $pagination->set_options(['page_delimiter' => '?page=']);
         $pagination->initialize($paginated['total'], $per_page, $paginated['current_page'], 'admin', 5);
 
-        $data['users'] = $paginated['data'];
+    $data['users'] = $paginated['data'];
         $data['pagination_html'] = $pagination->paginate();
+    $data['q'] = $q;
         $data['pagination_meta'] = [
             'total' => $paginated['total'],
             'per_page' => $paginated['per_page'],

@@ -80,4 +80,5 @@ class UsersModel extends Model {
             return false;
         }
     }
+    
 }
