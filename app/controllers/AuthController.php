@@ -15,13 +15,31 @@ class AuthController extends Controller {
             $email = $this->io->post('email');
             $password = $this->io->post('password');
             // safe debug: log attempt (no raw password)
-            $logDir = realpath(__DIR__ . '/../../runtime/logs') ?: __DIR__ . '/../../runtime/logs';
-            if (!is_dir($logDir)) {
-                @mkdir($logDir, 0777, true);
+            $preferredLogDir = __DIR__ . '/../../runtime/logs';
+            $logDir = null;
+            if (is_dir($preferredLogDir) && is_writable($preferredLogDir)) {
+                $logDir = realpath($preferredLogDir);
+            } else {
+                // fallback to system temp directory (works on Render and many hosts)
+                $tmp = sys_get_temp_dir();
+                if ($tmp && is_writable($tmp)) {
+                    $logDir = $tmp;
+                } else {
+                    // last resort: try to create preferred dir
+                    @mkdir($preferredLogDir, 0777, true);
+                    if (is_dir($preferredLogDir) && is_writable($preferredLogDir)) {
+                        $logDir = realpath($preferredLogDir);
+                    }
+                }
+            }
+            if (! $logDir) {
+                $logPath = null; // disable logging if no writable path
+            } else {
+                $logPath = $logDir . '/auth_debug.log';
             }
             $logPath = $logDir . '/auth_debug.log';
             $preLog = sprintf("[%s] Login POST received: email=%s, password_len=%d\n", date('c'), $email, is_string($password) ? strlen($password) : 0);
-            @file_put_contents($logPath, $preLog, FILE_APPEND | LOCK_EX);
+            if ($logPath) @file_put_contents($logPath, $preLog, FILE_APPEND | LOCK_EX);
 
             // find user by email
             $user = $this->UsersModel->filter(['email' => $email])->get();
@@ -31,7 +49,7 @@ class AuthController extends Controller {
             }
 
             $postLog = sprintf("[%s] Lookup result: email=%s, user_found=%d, pw_ok=%d, user_id=%s\n", date('c'), $email, $user ? 1 : 0, $pw_ok ? 1 : 0, isset($user['id']) ? $user['id'] : 'null');
-            @file_put_contents($logPath, $postLog, FILE_APPEND | LOCK_EX);
+            if ($logPath) @file_put_contents($logPath, $postLog, FILE_APPEND | LOCK_EX);
 
             if ($user && $pw_ok) {
                 // set session
