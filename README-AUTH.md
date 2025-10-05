@@ -4,11 +4,11 @@ Authentication & Admin setup
 Run the SQL migration in `migrations/001_add_auth_columns.sql` against your app database to add the `password` and `role` columns to the `students` table.
 
 2) Seed the default admin
-By default the app will attempt to seed a default admin user with email `colasito@admin` and password `c03232005` automatically on first visit to the login page. If you prefer to seed manually:
+By default the app will attempt to seed a default admin user with email `colasito@admin` and password `admin123` automatically on first visit to the login page. If you prefer to seed manually:
 
 - Generate password hash in PHP:
 
-  php -r "echo password_hash('c03232005', PASSWORD_DEFAULT).PHP_EOL;"
+  php -r "echo password_hash('admin123', PASSWORD_DEFAULT).PHP_EOL;"
 
 - Update the record (replace HASH):
 

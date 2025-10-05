@@ -14,44 +14,10 @@ class AuthController extends Controller {
         if ($this->io->method() == 'post') {
             $email = $this->io->post('email');
             $password = $this->io->post('password');
-            // safe debug: log attempt (no raw password)
-            $preferredLogDir = __DIR__ . '/../../runtime/logs';
-            $logDir = null;
-            if (is_dir($preferredLogDir) && is_writable($preferredLogDir)) {
-                $logDir = realpath($preferredLogDir);
-            } else {
-                // fallback to system temp directory (works on Render and many hosts)
-                $tmp = sys_get_temp_dir();
-                if ($tmp && is_writable($tmp)) {
-                    $logDir = $tmp;
-                } else {
-                    // last resort: try to create preferred dir
-                    @mkdir($preferredLogDir, 0777, true);
-                    if (is_dir($preferredLogDir) && is_writable($preferredLogDir)) {
-                        $logDir = realpath($preferredLogDir);
-                    }
-                }
-            }
-            if (! $logDir) {
-                $logPath = null; // disable logging if no writable path
-            } else {
-                $logPath = $logDir . '/auth_debug.log';
-            }
-            $logPath = $logDir . '/auth_debug.log';
-            $preLog = sprintf("[%s] Login POST received: email=%s, password_len=%d\n", date('c'), $email, is_string($password) ? strlen($password) : 0);
-            if ($logPath) @file_put_contents($logPath, $preLog, FILE_APPEND | LOCK_EX);
 
             // find user by email
             $user = $this->UsersModel->filter(['email' => $email])->get();
-            $pw_ok = false;
-            if ($user && isset($user['password'])) {
-                $pw_ok = password_verify($password, $user['password']);
-            }
-
-            $postLog = sprintf("[%s] Lookup result: email=%s, user_found=%d, pw_ok=%d, user_id=%s\n", date('c'), $email, $user ? 1 : 0, $pw_ok ? 1 : 0, isset($user['id']) ? $user['id'] : 'null');
-            if ($logPath) @file_put_contents($logPath, $postLog, FILE_APPEND | LOCK_EX);
-
-            if ($user && $pw_ok) {
+            if ($user && isset($user['password']) && password_verify($password, $user['password'])) {
                 // set session
                 $this->session->set_userdata('user_id', $user['id']);
                 $this->session->set_userdata('role', isset($user['role']) ? $user['role'] : 'user');
@@ -134,7 +100,7 @@ class AuthController extends Controller {
     {
     // default admin credentials (single admin)
     $admin_email = 'colasito@admin';
-    $admin_password = 'c03232005';
+    $admin_password = 'admin123';
 
         // If required columns are missing, do not attempt DB writes
         if (! $this->UsersModel->has_columns(['password', 'role'])) {
